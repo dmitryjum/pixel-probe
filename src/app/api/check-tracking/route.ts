@@ -23,19 +23,15 @@ export async function POST(request: Request) {
 
     if (!hasGTM) {
       message = "No Google Tag Manager implementation detected on this website."
-    // } else if (usesCustomDomain) {
-    //   message =
-    //     "GTM detected. This website is sending analytics data to a custom domain, potentially obfuscating tracking."
     } else {
       message = "GTM detected. This website is sending analytics data directly to Google Analytics."
     }
 
     return NextResponse.json({
       hasGTM,
-      // usesCustomDomain,
       message,
     })
   } catch (error) {
-    return NextResponse.json({ error: "Failed to process request" }, { status: 500 })
+    return NextResponse.json({ error: `Failed to process request: ${error}` }, { status: 500 })
   }
 }

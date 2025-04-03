@@ -15,7 +15,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<null | {
     hasGTM: boolean
-    // usesCustomDomain: boolean
     message: string
   }>(null)
 
@@ -42,8 +41,7 @@ export default function Home() {
     } catch (error) {
       setResult({
         hasGTM: false,
-        // usesCustomDomain: false,
-        message: "Error checking URL. Please try again.",
+        message: `Error checking URL: ${error}. Please try again.`,
       })
     } finally {
       setIsLoading(false)
@@ -63,7 +61,7 @@ export default function Home() {
         transition={{ duration: 0.5 }}
         className="max-w-3xl w-full mt-16 text-center"
       >
-        <h1 className="text-4xl font-bold mb-2">GTM Detector</h1>
+        <h1 className="text-4xl font-bold mb-2">Pixel Probe</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
           Detect Google Tag Manager implementations and identify custom domain analytics
         </p>

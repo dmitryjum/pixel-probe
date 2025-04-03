@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GTM Detector",
+  title: "Pixel Probe",
   description: "Detect Google Tag Manager implementations and identify custom domain analytics",
 };
 
