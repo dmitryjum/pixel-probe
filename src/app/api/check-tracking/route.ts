@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { chromium } from 'playwright';
+import playwright from "playwright";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils";
 
 export async function POST(request: Request) {
@@ -14,14 +14,15 @@ export async function POST(request: Request) {
     const sanitizedUrl = sanitizeUrl(url);
 
     console.log('Launching Playwright Chromium...');
-    browser = await chromium.launch({ headless: true });
+    const pwEndpoint = `wss://production-sfo.browserless.io/firefox/playwright?token=${process.env.BROWSERLESS_TOKEN}&proxy=residential`;
+    browser = await playwright.firefox.connect(pwEndpoint);
     const page = await browser.newPage();
 
     const gtmRequests: string[] = [];
     const obfuscatedRequests: string[] = [];
 
     // Intercept network requests
-    await page.route('**/*', async (route) => {
+    await page.route('**/*', async (route: any) => {
       try {
         const requestUrl = route.request().url();
         const resourceType = route.request().resourceType();
