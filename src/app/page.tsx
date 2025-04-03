@@ -16,11 +16,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<null | {
     hasGTM: boolean
-<<<<<<< HEAD
-=======
     gtmRequests?: string[],
     obfuscatedRequests?: string[],
->>>>>>> 269efa8 (WIP: need to fix the issue with chromium-min)
     message: string
   }>(null)
 
