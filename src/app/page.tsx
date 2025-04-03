@@ -9,12 +9,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import { isValidUrl } from "@/lib/utils"
 
 export default function Home() {
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<null | {
     hasGTM: boolean
+    gtmRequests?: string[],
+    obfuscatedRequests?: string[],
     message: string
   }>(null)
 
@@ -22,6 +25,22 @@ export default function Home() {
     e.preventDefault()
 
     if (!url) return
+
+    try {
+      if (!isValidUrl(url)) {
+        setResult({
+          hasGTM: false,
+          message: "Invalid URL. Please use http or https.",
+        });
+        return;
+      }
+    } catch {
+      setResult({
+        hasGTM: false,
+        message: "Invalid URL format. Please enter a valid URL.",
+      });
+      return;
+    }
 
     setIsLoading(true)
     setResult(null)
@@ -116,13 +135,27 @@ export default function Home() {
 
                 <p className="text-slate-700 dark:text-slate-300 text-lg">{result.message}</p>
 
-                {/* {result.hasGTM && (
-                  <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <Badge variant={result.usesCustomDomain ? "destructive" : "outline"} className="text-sm">
-                      {result.usesCustomDomain ? "Custom Domain Analytics Detected" : "Direct Google Analytics"}
-                    </Badge>
+                {result.gtmRequests && result.gtmRequests.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-lg font-medium mb-2">GTM Requests</h4>
+                    <ul className="list-disc list-inside text-slate-700 dark:text-slate-300">
+                      {result.gtmRequests.map((url, index) => (
+                        <li key={index} className="break-words">{url}</li>
+                      ))}
+                    </ul>
                   </div>
-                )} */}
+                )}
+
+                {result.obfuscatedRequests && result.obfuscatedRequests.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-medium mb-2">Obfuscated Requests</h4>
+                    <ul className="list-disc list-inside text-slate-700 dark:text-slate-300">
+                      {result.obfuscatedRequests.map((url, index) => (
+                        <li key={index} className="break-words">{url}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </motion.div>
             )}
           </CardContent>
