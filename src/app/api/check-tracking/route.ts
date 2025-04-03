@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import playwright from "playwright";
+import playwright, { Route } from "playwright";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils";
 
 export async function POST(request: Request) {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const obfuscatedRequests: string[] = [];
 
     // Intercept network requests
-    await page.route('**/*', async (route: any) => {
+    await page.route('**/*', async (route: Route) => {
       try {
         const requestUrl = route.request().url();
         const resourceType = route.request().resourceType();
