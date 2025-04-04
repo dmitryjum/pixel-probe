@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer-core";
+import puppeteer, { HTTPRequest }  from "puppeteer-core";
+// import PuppeteerRequest from "puppeteer-core"
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
 
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     const gtmRequests: string[] = [];
     const obfuscatedRequests: string[] = [];
 
-    page.on("request", (req: any) => {
+    page.on("request", (req: HTTPRequest) => {
       const requestUrl = req.url();
       const resourceType = req.resourceType();
 

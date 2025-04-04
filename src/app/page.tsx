@@ -60,7 +60,8 @@ export default function Home() {
     } catch (error) {
       setResult({
         hasGTM: false,
-        message: `Error checking URL: ${error}. Please try again.`,
+        // usesCustomDomain: false,
+        message: `${error}. Please try again.`,
       })
     } finally {
       setIsLoading(false)
