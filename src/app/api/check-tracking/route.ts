@@ -4,6 +4,10 @@ import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
 export const maxDuration = 45
+type CombinedHTTPRequest =
+  | import("puppeteer-core").HTTPRequest
+  | import("puppeteer").HTTPRequest;
+
 export async function POST(request: Request) {
   try {
     const { url } = await request.json();
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
     const gtmRequests: string[] = [];
     const obfuscatedRequests: string[] = [];
 
-    page.on("request", (req: HTTPRequest) => {
+    page.on("request", (req: CombinedHTTPRequest) => {
       const requestUrl = req.url();
       const resourceType = req.resourceType();
 

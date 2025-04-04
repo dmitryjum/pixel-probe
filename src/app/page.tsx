@@ -101,7 +101,7 @@ export default function Home() {
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit" className="flex-1 h-12 text-lg" disabled={isLoading || !url}>
+                <Button type="submit" className="flex-1 h-12 text-lg cursor-pointer" disabled={isLoading || !url}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -113,7 +113,7 @@ export default function Home() {
                 </Button>
 
                 {result && (
-                  <Button type="button" variant="outline" className="flex-1 h-12 text-lg" onClick={handleClear}>
+                  <Button type="button" variant="outline" className="flex-1 h-12 text-lg cursor-pointer" onClick={handleClear}>
                     Clear
                   </Button>
                 )}
