@@ -9,12 +9,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import { isValidUrl } from "@/lib/utils"
 
 export default function Home() {
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<null | {
     hasGTM: boolean
+    gtmRequests?: string[],
+    obfuscatedRequests?: string[],
     message: string
   }>(null)
 
@@ -22,6 +25,22 @@ export default function Home() {
     e.preventDefault()
 
     if (!url) return
+
+    try {
+      if (!isValidUrl(url)) {
+        setResult({
+          hasGTM: false,
+          message: "Invalid URL. Please use http or https.",
+        });
+        return;
+      }
+    } catch {
+      setResult({
+        hasGTM: false,
+        message: "Invalid URL format. Please enter a valid URL.",
+      });
+      return;
+    }
 
     setIsLoading(true)
     setResult(null)
@@ -41,7 +60,8 @@ export default function Home() {
     } catch (error) {
       setResult({
         hasGTM: false,
-        message: `Error checking URL: ${error}. Please try again.`,
+        // usesCustomDomain: false,
+        message: `${error}. Please try again.`,
       })
     } finally {
       setIsLoading(false)
@@ -81,7 +101,7 @@ export default function Home() {
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit" className="flex-1 h-12 text-lg" disabled={isLoading || !url}>
+                <Button type="submit" className="flex-1 h-12 text-lg cursor-pointer" disabled={isLoading || !url}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -93,7 +113,7 @@ export default function Home() {
                 </Button>
 
                 {result && (
-                  <Button type="button" variant="outline" className="flex-1 h-12 text-lg" onClick={handleClear}>
+                  <Button type="button" variant="outline" className="flex-1 h-12 text-lg cursor-pointer" onClick={handleClear}>
                     Clear
                   </Button>
                 )}
@@ -116,13 +136,99 @@ export default function Home() {
 
                 <p className="text-slate-700 dark:text-slate-300 text-lg">{result.message}</p>
 
-                {/* {result.hasGTM && (
-                  <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <Badge variant={result.usesCustomDomain ? "destructive" : "outline"} className="text-sm">
-                      {result.usesCustomDomain ? "Custom Domain Analytics Detected" : "Direct Google Analytics"}
-                    </Badge>
+                {result.gtmRequests && result.gtmRequests.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-lg font-medium mb-2">GTM Requests</h4>
+                    <div className="space-y-2">
+                      {result.gtmRequests.map((url, index) => (
+                        <div
+                          key={index}
+                          className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+                        >
+                          <p
+                            className="text-slate-700 dark:text-slate-300 text-sm break-words"
+                            style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
+                          >
+                            {url.length > 30 ? (
+                              <>
+                                {url.slice(0, 30)}...
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const fullUrlElement = document.getElementById(`gtm-url-${index}`);
+                                    if (fullUrlElement) {
+                                      fullUrlElement.style.display =
+                                        fullUrlElement.style.display === "none" ? "block" : "none";
+                                    }
+                                  }}
+                                  className="text-blue-500 hover:underline ml-2"
+                                >
+                                  Show More
+                                </button>
+                                <span
+                                  id={`gtm-url-${index}`}
+                                  style={{ display: "none" }}
+                                  className="block mt-2"
+                                >
+                                  {url}
+                                </span>
+                              </>
+                            ) : (
+                              url
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )} */}
+                )}
+
+                {result.obfuscatedRequests && result.obfuscatedRequests.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-lg font-medium mb-2">Obfuscated Requests</h4>
+                    <div className="space-y-2">
+                      {result.obfuscatedRequests.map((url, index) => (
+                        <div
+                          key={index}
+                          className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+                        >
+                          <p
+                            className="text-slate-700 dark:text-slate-300 text-sm break-words"
+                            style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
+                          >
+                            {url.length > 30 ? (
+                              <>
+                                {url.slice(0, 30)}...
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const fullUrlElement = document.getElementById(`obfuscated-url-${index}`);
+                                    if (fullUrlElement) {
+                                      fullUrlElement.style.display =
+                                        fullUrlElement.style.display === "none" ? "block" : "none";
+                                    }
+                                  }}
+                                  className="text-blue-500 hover:underline ml-2"
+                                >
+                                  Show More
+                                </button>
+                                <span
+                                  id={`obfuscated-url-${index}`}
+                                  style={{ display: "none" }}
+                                  className="block mt-2"
+                                >
+                                  {url}
+                                </span>
+                              </>
+                            ) : (
+                              url
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
           </CardContent>
