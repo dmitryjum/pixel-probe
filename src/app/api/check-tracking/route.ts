@@ -3,7 +3,7 @@ import puppeteerCore from "puppeteer-core";
 import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
-export const maxDuration = 45
+export const maxDuration = 60
 type CombinedHTTPRequest =
   | import("puppeteer-core").HTTPRequest
   | import("puppeteer").HTTPRequest;
