@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import puppeteerCore, { HTTPRequest }  from "puppeteer-core";
+import puppeteerCore from "puppeteer-core";
 import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
@@ -35,7 +35,6 @@ export async function POST(request: Request) {
 
     const page = await browser.newPage();
 
-    // Block unnecessary resources (images, stylesheets, fonts)
     await page.setRequestInterception(true);
 
     const gtmRequests: string[] = [];
@@ -56,7 +55,7 @@ export async function POST(request: Request) {
         gtmRequests.push(requestUrl);
 
         // Identify obfuscated requests (custom domains)
-        if (!requestUrl.includes("google-analytics.com") && !requestUrl.includes("googletagmanager.com")) {
+        if (!requestUrl.includes("google-analytics.com") && !requestUrl.includes("googletagmanager.com") && requestUrl.includes('/g/collect')) {
           obfuscatedRequests.push(requestUrl);
         }
       }
