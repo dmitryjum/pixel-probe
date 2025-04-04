@@ -4,6 +4,7 @@ import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
 export const maxDuration = 60
+
 type CombinedHTTPRequest =
   | import("puppeteer-core").HTTPRequest
   | import("puppeteer").HTTPRequest;
@@ -39,10 +40,16 @@ export async function POST(request: Request) {
 
     const gtmRequests: string[] = [];
     const obfuscatedRequests: string[] = [];
+    const gtmDomains: string[] = [
+      "google-analytics.com",
+      "googletagmanager.com",
+      "google.com",
+      "doubleclick.net",
+    ];
 
     page.on("request", (req: CombinedHTTPRequest) => {
-      const requestUrl = req.url();
-      const resourceType = req.resourceType();
+      const requestUrl: string = req.url();
+      const resourceType: string = req.resourceType();
 
       // Block unnecessary resources
       if (["image", "stylesheet", "font"].includes(resourceType)) {
@@ -50,26 +57,16 @@ export async function POST(request: Request) {
         return;
       }
 
-      // Capture GTM-related requests
-      if (requestUrl.includes("google-analytics.com") || requestUrl.includes("googletagmanager.com")) {
-        gtmRequests.push(requestUrl);
-      }
-
-      // Identify obfuscated requests (custom domains)
-      if (!requestUrl.includes("google-analytics.com") && !requestUrl.includes("googletagmanager.com") && requestUrl.includes('/g/collect')) {
-        obfuscatedRequests.push(requestUrl);
-      }
+      const isGtmRequest: boolean = gtmDomains.some((domain: string) => requestUrl.includes(domain));
+      if (isGtmRequest) gtmRequests.push(requestUrl); // Capture GTM-related requests
+      if (!isGtmRequest && requestUrl.includes('/g/collect')) obfuscatedRequests.push(requestUrl); // Identify obfuscated requests (custom domains)
 
       req.continue();
     });
 
-    // Navigate to the URL and wait for the page to load
     await page.goto(sanitizedUrl, { waitUntil: "networkidle2" });
-
-    // Close the browser
     await browser.close();
 
-    // Prepare the response
     const hasGTM = gtmRequests.length > 0;
     const message = hasGTM
       ? `GTM detected. ${obfuscatedRequests.length} obfuscated requests found.`
