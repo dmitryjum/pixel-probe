@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pixel Probe",
+  title: "Bold Spark Media Detector",
   description: "Detect Google Tag Manager implementations and identify custom domain analytics",
 };
 

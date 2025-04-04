@@ -80,7 +80,7 @@ export default function Home() {
         transition={{ duration: 0.5 }}
         className="max-w-3xl w-full mt-16 text-center"
       >
-        <h1 className="text-4xl font-bold mb-2">Pixel Probe</h1>
+        <h1 className="text-4xl font-bold mb-2">Bold Spark Media Detector</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
           Detect Google Tag Manager implementations and identify custom domain analytics
         </p>
