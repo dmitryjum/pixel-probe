@@ -51,13 +51,13 @@ export async function POST(request: Request) {
       }
 
       // Capture GTM-related requests
-      if (requestUrl.includes("/collect") || requestUrl.includes("googletagmanager.com")) {
+      if (requestUrl.includes("google-analytics.com") || requestUrl.includes("googletagmanager.com")) {
         gtmRequests.push(requestUrl);
+      }
 
-        // Identify obfuscated requests (custom domains)
-        if (!requestUrl.includes("google-analytics.com") && !requestUrl.includes("googletagmanager.com") && requestUrl.includes('/g/collect')) {
-          obfuscatedRequests.push(requestUrl);
-        }
+      // Identify obfuscated requests (custom domains)
+      if (!requestUrl.includes("google-analytics.com") && !requestUrl.includes("googletagmanager.com") && requestUrl.includes('/g/collect')) {
+        obfuscatedRequests.push(requestUrl);
       }
 
       req.continue();
