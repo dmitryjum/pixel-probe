@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { isValidUrl } from "@/lib/utils"
+import { RequestList } from "@/components/requestList"
 
 export default function Home() {
   const [url, setUrl] = useState("")
@@ -46,7 +47,6 @@ export default function Home() {
     setResult(null)
 
     try {
-      // This will be replaced with your actual API endpoint
       const response = await fetch("/api/check-tracking", {
         method: "POST",
         headers: {
@@ -60,7 +60,6 @@ export default function Home() {
     } catch (error) {
       setResult({
         hasGTM: false,
-        // usesCustomDomain: false,
         message: `${error}. Please try again.`,
       })
     } finally {
@@ -137,97 +136,19 @@ export default function Home() {
                 <p className="text-slate-700 dark:text-slate-300 text-lg">{result.message}</p>
 
                 {result.gtmRequests && result.gtmRequests.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-lg font-medium mb-2">GTM Requests</h4>
-                    <div className="space-y-2">
-                      {result.gtmRequests.map((url, index) => (
-                        <div
-                          key={index}
-                          className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
-                        >
-                          <p
-                            className="text-slate-700 dark:text-slate-300 text-sm break-words"
-                            style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
-                          >
-                            {url.length > 30 ? (
-                              <>
-                                {url.slice(0, 30)}...
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    const fullUrlElement = document.getElementById(`gtm-url-${index}`);
-                                    if (fullUrlElement) {
-                                      fullUrlElement.style.display =
-                                        fullUrlElement.style.display === "none" ? "block" : "none";
-                                    }
-                                  }}
-                                  className="text-blue-500 hover:underline ml-2"
-                                >
-                                  Show More
-                                </button>
-                                <span
-                                  id={`gtm-url-${index}`}
-                                  style={{ display: "none" }}
-                                  className="block mt-2"
-                                >
-                                  {url}
-                                </span>
-                              </>
-                            ) : (
-                              url
-                            )}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <RequestList
+                    title="GTM Requests"
+                    requests={result.gtmRequests}
+                    idPrefix="gtm-url"
+                  />
                 )}
 
                 {result.obfuscatedRequests && result.obfuscatedRequests.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-lg font-medium mb-2">Obfuscated Requests</h4>
-                    <div className="space-y-2">
-                      {result.obfuscatedRequests.map((url, index) => (
-                        <div
-                          key={index}
-                          className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
-                        >
-                          <p
-                            className="text-slate-700 dark:text-slate-300 text-sm break-words"
-                            style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
-                          >
-                            {url.length > 30 ? (
-                              <>
-                                {url.slice(0, 30)}...
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    const fullUrlElement = document.getElementById(`obfuscated-url-${index}`);
-                                    if (fullUrlElement) {
-                                      fullUrlElement.style.display =
-                                        fullUrlElement.style.display === "none" ? "block" : "none";
-                                    }
-                                  }}
-                                  className="text-blue-500 hover:underline ml-2"
-                                >
-                                  Show More
-                                </button>
-                                <span
-                                  id={`obfuscated-url-${index}`}
-                                  style={{ display: "none" }}
-                                  className="block mt-2"
-                                >
-                                  {url}
-                                </span>
-                              </>
-                            ) : (
-                              url
-                            )}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <RequestList
+                    title="Obfuscated Requests"
+                    requests={result.obfuscatedRequests}
+                    idPrefix="obfuscated-url"
+                  />
                 )}
               </motion.div>
             )}
