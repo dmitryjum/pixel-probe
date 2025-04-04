@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import puppeteer, { HTTPRequest }  from "puppeteer-core";
-// import PuppeteerRequest from "puppeteer-core"
+import puppeteerCore, { HTTPRequest }  from "puppeteer-core";
+import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
-
+export const maxDuration = 45
 export async function POST(request: Request) {
   try {
     const { url } = await request.json();
@@ -14,13 +14,20 @@ export async function POST(request: Request) {
     
     const sanitizedUrl = sanitizeUrl(url);
 
-    // Launch Puppeteer with @sparticuz/chromium-min
-    const browser = await puppeteer.launch({
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(process.env.CHROMIUM_URL),
-      args: chromium.args,
-      headless: chromium.headless
-    });
+    let browser;
+    if (process.env.NODE_ENV === "production")  {
+      browser = await puppeteerCore.launch({
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(process.env.CHROMIUM_URL),
+        args: chromium.args,
+        headless: chromium.headless
+      });
+    } else {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      });
+    }
 
     const page = await browser.newPage();
 
