@@ -51,10 +51,6 @@ export async function POST(request: Request) {
       "doubleclick.net",
     ];
 
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
-    );
-
     page.on("request", (req: CombinedHTTPRequest) => {
       const requestUrl: string = req.url();
       const resourceType: string = req.resourceType();
@@ -73,14 +69,16 @@ export async function POST(request: Request) {
     });
 
     await page.goto(sanitizedUrl, { waitUntil: "networkidle2" });
-    const pageContent = await page.content();
-     const $ = cheerio.load(pageContent);
-
-    // Check for GTM script tags or dataLayer
-    const gtmDetectedInHtml =
-      $('script[src*="googletagmanager.com/gtm.js"]').length > 0 || $("script:contains('dataLayer')").length > 0;
     await browser.close();
+    
+    let gtmDetectedInHtml: boolean = false;
+    if (gtmRequests.length < 0) { // Check for GTM script tags or dataLayer
+      const html = await fetch(sanitizedUrl).then(res => res.text());
+      const $ = cheerio.load(html);
+      gtmDetectedInHtml =
+        $('script[src*="googletagmanager.com/gtm.js"]').length > 0 || $("script:contains('dataLayer')").length > 0;
 
+    }
     const hasGTM: boolean = gtmRequests.length > 0 || gtmDetectedInHtml;
     let message: string = "";
     if (hasGTM) {

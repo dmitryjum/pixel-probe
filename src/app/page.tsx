@@ -58,6 +58,7 @@ export default function Home() {
       const data = await response.json()
       if (!response.ok) {
         // Handle non-200 responses
+        console.error("Error:", data.error)
         setResult({
           hasGTM: false,
           message: "An error occurred. Please check the URL and try again.",
@@ -67,9 +68,10 @@ export default function Home() {
 
       setResult(data)
     } catch (error) {
+      console.error(error)
       setResult({
         hasGTM: false,
-        message: `${error}. Please try again.`,
+        message: "An error occurred. The requested site may not be responsive. Please try again.",
       })
     } finally {
       setIsLoading(false)
