@@ -82,7 +82,7 @@ export default function Home() {
       >
         <h1 className="text-4xl font-bold mb-2">Bold Spark Media Detector</h1>
         <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-          Detect Google Tag Manager implementations and identify custom domain analytics
+          Detect Google Tag Manager implementations and identify primary domain analytics
         </p>
 
         <Card className="shadow-lg border-slate-200 dark:border-slate-800">
@@ -104,7 +104,7 @@ export default function Home() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Analyzing...
+                      Analyzing... Please be patient, it may take a few minutes...
                     </>
                   ) : (
                     "Analyze Website"
