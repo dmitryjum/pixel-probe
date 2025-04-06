@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       const resourceType: string = req.resourceType();
 
       // Block unnecessary resources
-      if (["image", "stylesheet", "font"].includes(resourceType)) {
+      if (["image", "stylesheet", "font", "media", "other"].includes(resourceType)) {
         req.abort();
         return;
       }
