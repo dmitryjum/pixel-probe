@@ -50,6 +50,10 @@ export async function POST(request: Request) {
       "doubleclick.net",
     ];
 
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+    );
+
     page.on("request", (req: CombinedHTTPRequest) => {
       const requestUrl: string = req.url();
       const resourceType: string = req.resourceType();
