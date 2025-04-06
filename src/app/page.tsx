@@ -56,6 +56,15 @@ export default function Home() {
       })
 
       const data = await response.json()
+      if (!response.ok) {
+        // Handle non-200 responses
+        setResult({
+          hasGTM: false,
+          message: "An error occurred. Please check the URL and try again.",
+        });
+        return;
+      }
+
       setResult(data)
     } catch (error) {
       setResult({

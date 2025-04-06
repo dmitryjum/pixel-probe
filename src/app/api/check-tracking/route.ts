@@ -72,12 +72,22 @@ export async function POST(request: Request) {
     });
 
     await page.goto(sanitizedUrl, { waitUntil: "networkidle2" });
+    const pageContent = await page.content();
+    const gtmDetectedInHtml = pageContent.includes("https://www.googletagmanager.com/gtm.js") ||
+                              pageContent.includes("dataLayer");
     await browser.close();
 
-    const hasGTM = gtmRequests.length > 0;
-    const message = hasGTM
-      ? `GTM detected. ${obfuscatedRequests.length} obfuscated requests found.`
-      : "No Google Tag Manager implementation detected on this website.";
+    const hasGTM: boolean = gtmRequests.length > 0 || gtmDetectedInHtml;
+    let message: string = "";
+    if (hasGTM) {
+      if (gtmRequests.length > 0) {
+        message = `GTM or GA detected. ${obfuscatedRequests.length} obfuscated requests found.`;
+      } else {
+        message = "GTM detected in the HTML, but no requests were captured. The site may be blocking bot traffic.";
+      }
+    } else {
+      message = "No Google Tag Manager or Google Analytics implementation detected on this website. The detection may be prevented by the site";
+    }
 
     return NextResponse.json({
       hasGTM,
@@ -87,6 +97,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error processing request:", error);
-    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
+    return NextResponse.json({ error: `Error processing request: ${error}` }, { status: 500 });
   }
 }
