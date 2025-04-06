@@ -3,6 +3,7 @@ import puppeteerCore from "puppeteer-core";
 import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
+import * as cheerio from "cheerio";
 import path from "path";
 
 export const maxDuration = 60
@@ -73,8 +74,11 @@ export async function POST(request: Request) {
 
     await page.goto(sanitizedUrl, { waitUntil: "networkidle2" });
     const pageContent = await page.content();
-    const gtmDetectedInHtml = pageContent.includes("https://www.googletagmanager.com/gtm.js") ||
-                              pageContent.includes("dataLayer");
+     const $ = cheerio.load(pageContent);
+
+    // Check for GTM script tags or dataLayer
+    const gtmDetectedInHtml =
+      $('script[src*="googletagmanager.com/gtm.js"]').length > 0 || $("script:contains('dataLayer')").length > 0;
     await browser.close();
 
     const hasGTM: boolean = gtmRequests.length > 0 || gtmDetectedInHtml;
