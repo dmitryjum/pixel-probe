@@ -67,28 +67,28 @@ export async function POST(request: Request) {
 
       req.continue();
     });
+    const html = await fetch(sanitizedUrl).then(res => res.text());
+    const $ = cheerio.load(html);
+    const gtmDetectedInHtml: boolean = $("script").filter((_, el) => {
+      const scriptContent = $(el).html() || "";
+
+      return ["dataLayer", "analytics", "gtag"].some((keyword) => scriptContent.includes(keyword))
+    }).length > 0;
 
     await page.goto(sanitizedUrl, { waitUntil: "networkidle2" });
     await browser.close();
-    
-    let gtmDetectedInHtml: boolean = false;
-    if (gtmRequests.length < 0) { // Check for GTM script tags or dataLayer
-      const html = await fetch(sanitizedUrl).then(res => res.text());
-      const $ = cheerio.load(html);
-      gtmDetectedInHtml =
-        $('script[src*="googletagmanager.com/gtm.js"]').length > 0 || $("script:contains('dataLayer')").length > 0;
 
-    }
     const hasGTM: boolean = gtmRequests.length > 0 || gtmDetectedInHtml;
     let message: string = "";
+    const contactUs = "The detection may be prevented by the site. Please contact us so we can check manually for you."
     if (hasGTM) {
       if (gtmRequests.length > 0) {
         message = `GTM or GA detected. ${obfuscatedRequests.length} obfuscated requests found.`;
       } else {
-        message = "GTM detected in the HTML, but no requests were captured. The site may be blocking bot traffic.";
+        message = `GTM detected in the HTML, but no requests were captured. ${contactUs}`;
       }
     } else {
-      message = "No Google Tag Manager or Google Analytics implementation detected on this website. The detection may be prevented by the site";
+      message = `No GTM or Google Analytics implementation detected on this website. ${contactUs}`;
     }
 
     return NextResponse.json({
