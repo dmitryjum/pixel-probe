@@ -3,6 +3,8 @@ import puppeteerCore from "puppeteer-core";
 import puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
+import path from "path";
+
 export const maxDuration = 60
 
 type CombinedHTTPRequest =
@@ -20,10 +22,11 @@ export async function POST(request: Request) {
     const sanitizedUrl = sanitizeUrl(url);
 
     let browser;
+    const chromiumPath = path.join(process.cwd(), "chromium");
     if (process.env.NODE_ENV === "production")  {
       browser = await puppeteerCore.launch({
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(process.env.CHROMIUM_URL),
+        executablePath: await chromium.executablePath(chromiumPath),
         args: chromium.args,
         headless: chromium.headless
       });
