@@ -23,7 +23,6 @@ export async function POST(request: Request) {
 
     let browser;
     const chromiumPath = path.join(process.cwd(), "chromium");
-    console.log("Chromium path:", chromiumPath);
     if (process.env.NODE_ENV === "production")  {
       browser = await puppeteerCore.launch({
         defaultViewport: chromium.defaultViewport,
