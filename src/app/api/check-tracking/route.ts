@@ -48,7 +48,31 @@ export async function POST(request: Request) {
       "google-analytics.com",
       "googletagmanager.com",
       "google.com",
+      "analytics.google.com",
+    ];
+
+    const blockedDomains = [
       "doubleclick.net",
+      "googleadservices.com",
+      "static.doubleclick.net",
+      "play.google.com",
+      "cdn-cgi/scripts",
+      "youtube.com/s/player",
+      "google.com/js",
+    ];
+
+    const blockedResourcTypes = [
+      "image",
+      "stylesheet",
+      "font",
+      "media",
+      "other"
+    ];
+
+    const blockedPaths = [
+      "/wp-content/plugins/",
+      "/wp-content/themes/",
+      "/wp-includes/js/mediaelement/",
     ];
 
     page.on("request", (req: CombinedHTTPRequest) => {
@@ -56,11 +80,13 @@ export async function POST(request: Request) {
       const resourceType: string = req.resourceType();
 
       // Block unnecessary resources
-      if (["image", "stylesheet", "font", "media", "other"].includes(resourceType)) {
+      if (blockedResourcTypes.includes(resourceType) ||
+        blockedDomains.some((domain: string) => requestUrl.includes(domain)) ||
+        blockedPaths.some((path: string) => requestUrl.includes(path))) {
         req.abort();
         return;
       }
-
+      
       const isGtmRequest: boolean = gtmDomains.some((domain: string) => requestUrl.includes(domain));
       if (isGtmRequest) gtmRequests.push(requestUrl); // Capture GTM-related requests
       if (!isGtmRequest && requestUrl.includes('/g/collect')) obfuscatedRequests.push(requestUrl); // Identify obfuscated requests (custom domains)
