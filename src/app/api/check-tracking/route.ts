@@ -5,6 +5,19 @@ import chromium from "@sparticuz/chromium-min";
 import { isValidUrl, sanitizeUrl } from "@/lib/utils"
 import * as cheerio from "cheerio";
 import path from "path";
+import { BlockedResources } from "@/lib/blockedResources";
+import { generateObject } from  "ai";
+import { z } from "zod";
+import { createOpenAI } from '@ai-sdk/openai';
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  compatibility: 'strict',
+});
+
+const OpenAIResponseSchema = z.object({
+  values: z.array(z.string()),
+});
 
 export const maxDuration = 60
 
@@ -21,7 +34,9 @@ export async function POST(request: Request) {
     }
     
     const sanitizedUrl = sanitizeUrl(url);
-
+    const loggedRequests: string[] = [];
+    const blockedValues = await BlockedResources.getBlockedValues();
+    
     let browser;
     const chromiumPath = path.join(process.cwd(), "chromium");
     if (process.env.NODE_ENV === "production")  {
@@ -51,16 +66,6 @@ export async function POST(request: Request) {
       "analytics.google.com",
     ];
 
-    const blockedDomains = [
-      "doubleclick.net",
-      "googleadservices.com",
-      "static.doubleclick.net",
-      "play.google.com",
-      "cdn-cgi/scripts",
-      "youtube.com/s/player",
-      "google.com/js",
-    ];
-
     const blockedResourcTypes = [
       "image",
       "stylesheet",
@@ -69,20 +74,12 @@ export async function POST(request: Request) {
       "other"
     ];
 
-    const blockedPaths = [
-      "/wp-content/plugins/",
-      "/wp-content/themes/",
-      "/wp-includes/js/mediaelement/",
-    ];
-
     page.on("request", (req: CombinedHTTPRequest) => {
       const requestUrl: string = req.url();
       const resourceType: string = req.resourceType();
-
+      loggedRequests.push(requestUrl);
       // Block unnecessary resources
-      if (blockedResourcTypes.includes(resourceType) ||
-        blockedDomains.some((domain: string) => requestUrl.includes(domain)) ||
-        blockedPaths.some((path: string) => requestUrl.includes(path))) {
+      if (blockedResourcTypes.includes(resourceType) || blockedValues.some((value) => requestUrl.includes(value))) {
         req.abort();
         return;
       }
@@ -115,6 +112,23 @@ export async function POST(request: Request) {
       }
     } else {
       message = `No GTM or Google Analytics implementation detected on this website. ${contactUs}`;
+    }
+
+    const prompt = `Analyze the following list of outgoing requests and suggest
+     domains or paths that can be safely blocked
+     without breaking the page functionality in order to make sure that the page fully loads Google Analytics or Google Tag Manager
+     scripts and makes those requests. As an example: we're trying to track the requests to following domains: ${gtmDomains.join(", ")}
+     and we want to make sure the page will load and make requests to those domains.
+     Return the result as an array of strings according to the submitted schema.\nRequests:\n${loggedRequests.join("\n")}`;
+    try {
+      const { object } = await generateObject({
+        model: openai.responses("gpt-4o"),
+        prompt,
+        schema: OpenAIResponseSchema,
+      });
+      await BlockedResources.addBlockedValues(object.values);
+    } catch (error) {
+      console.error("Error generating OpenAI response:", error);
     }
 
     return NextResponse.json({
